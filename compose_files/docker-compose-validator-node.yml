@@ -1,0 +1,26 @@
+volumes:
+  node-data:
+
+networks:
+  inet:
+
+services:
+  node:
+    image: horizenlabs/zkverify:${NODE_VERSION}
+    env_file:
+      - .env
+    container_name: ${NODE_NAME}
+    hostname: ${NODE_NAME}
+    restart: on-failure:5
+    networks:
+      inet:
+    ports:
+      - "${NODE_NET_P2P_PORT}:${NODE_NET_P2P_PORT}"
+    volumes:
+      - node-data:/data
+      - ./configs/node:/data/config
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "512m"
+        max-file: "4"
