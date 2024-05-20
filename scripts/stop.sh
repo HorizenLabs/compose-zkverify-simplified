@@ -16,22 +16,13 @@ if ! [ -d "${DEPLOYMENT_DIR}" ]; then
   fn_die "\nDeployment directory does not exist. Exiting...\n"
 fi
 
-log_info "\n=== Stopping the project..."
-docker compose -f "${DEPLOYMENT_DIR}"/docker-compose.yml down
-log_info "\n=== Project has been stopped successfully."
-
-remove_volumes_answer="$(selection_yn "\nDo you want to remove docker volumes?")"
-if [ "${remove_volumes_answer}" = "yes" ]; then
-  log_info "\n=== Removing docker volumes..."
-  docker compose -f "${DEPLOYMENT_DIR}"/docker-compose.yml down --volumes
+containers="$(docker compose -f "${DEPLOYMENT_DIR}"/docker-compose.yml ps -a -q)" || fn_die "\nError: could not identify existing containers to stop. Exiting...\n"
+if [ -n "${containers}" ]; then
+  log_info "\n=== Stopping the project..."
+  docker compose -f "${DEPLOYMENT_DIR}"/docker-compose.yml down
+  log_info "\n=== Project has been stopped successfully."
+else
+  log_info "\n=== All the containers associated with the project were already stopped. Doing nothing..."
 fi
-
-remove_deployment_dir_answer="$(selection_yn "\nDo you want to remove the deployment directory?")"
-if [ "${remove_deployment_dir_answer}" = "yes" ]; then
-  log_info "\n=== Removing deployment directory..."
-  rm -rf "${DEPLOYMENT_DIR?}"
-fi
-
-log_info "\n=== Project has been stopped successfully."
 
 exit 0
