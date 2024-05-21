@@ -65,9 +65,7 @@ source "${ENV_FILE}" || fn_die "\nError: could not source ${ENV_FILE} file. Fix 
 check_required_variables
 
 log_info "\n=== Project has been initialized correctly for ${NODE_TYPE} on ${NETWORK}"
-
-log_info "\n=== Project has been initialized correctly for ${NODE_TYPE} on ${NETWORK}"
-log_info "\n=== Run the compose project with the following command: "
+log_info "\n=== Start the compose project with the following command: "
 log_info "\n========================"
 log_warn "docker compose -f ${DEPLOYMENT_DIR}/docker-compose.yml up -d"
 log_info "========================\n"

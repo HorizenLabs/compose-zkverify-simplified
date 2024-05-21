@@ -60,7 +60,7 @@ for line in "${env_template_lines[@]}"; do
 done
 
 # Update the values of the conditional update variables if approved by the user
-log_info "\n=== Updating the values of the conditional update variables"
+log_info "\n=== Updating the values of the conditional update variables..."
 for line in "${env_template_lines[@]}"; do
   var_name=$(echo "${line}" | cut -d'=' -f1)
   if ! [ ${#conditional_update_vars[@]} -eq 0 ]; then
@@ -86,7 +86,7 @@ log_info "\n=== ${ENV_FILE} update completed successfully"
 log_info "\n=== Please review the changes in the ${ENV_FILE} file, if there is anything wrong you can restore from the backup ${backup_dir}"
 
 log_info "\n=== Project has been updated correctly for ${NODE_TYPE} on ${NETWORK}"
-log_info "\n=== Run the compose project with the following command: "
+log_info "\n=== Start the compose project with the following command: "
 log_info "\n========================"
 log_warn "docker compose -f ${DEPLOYMENT_DIR}/docker-compose.yml up -d --force-recreate"
 log_info "========================\n"

@@ -1,6 +1,6 @@
 # Compose zkverify simplified
 
-This repository contains all the resources for deploying a zkverify rpc, validator, or boot nodes, on testnet.
+This repository contains all the resources for deploying a zkverify rpc, validator, or boot node, on testnet.
 
 
 ## Project overview
@@ -57,13 +57,21 @@ In order to update the project to the new version:
 Should the script prompt you to update some of the values in .env file, it is recommended to accept all the changes
 unless you know what you are doing.
 
+### Destroy
+
+Run the [destroy.sh](./scripts/destroy.sh) script to destroy the node stack and all the associated resources.
+
+```shell
+./scripts/destroy.sh
+```
+
 ---
 
 ## Usage Guide
 
 ### Start
 
-Run the [start.sh](./scripts/start.sh) script to start the node.
+Run the [start.sh](./scripts/start.sh) script to start the node stack.
 
 ```shell
 ./scripts/start.sh
@@ -71,7 +79,7 @@ Run the [start.sh](./scripts/start.sh) script to start the node.
 
 ### Stop
 
-Run the [stop.sh](./scripts/stop.sh) script to just stop, or stop and delete the node.
+Run the [stop.sh](./scripts/stop.sh) script to just stop the node stack.
 
 ```shell
 ./scripts/stop.sh

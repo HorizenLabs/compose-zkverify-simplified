@@ -111,8 +111,13 @@ selection_yn() {
   [ "$#" -ne 1 ] && fn_die "\n${FUNCNAME[0]} error: function requires exactly one argument.\n\n${usage}"
 
   local message="${1}"
+  local user_exit_err_code=234
+
   log_warn "${message}"
   response="$(selection "yes no")"
+  if [[ ! "${response}" =~ ^(yes|no)$ ]]; then
+    exit "${user_exit_err_code}"
+  fi
   echo "${response}"
 }
 
@@ -304,7 +309,7 @@ set_up_rpc_methods_env_var() {
 }
 
 set_up_pruning_env_var() {
-  pruning_answer="$(selection_yn "\nDo you want to run an rpc archival node (this will keep all the blocks locally)?")"
+  pruning_answer="$(selection_yn "\nDo you want to run an rpc archival node (this will keep a local copy of all blocks, enabling full historical data access)?")"
   if [ "${pruning_answer}" = "no" ]; then
     log_warn "\nPlease specify how many blocks to keep: "
     read -rp "#? " pruning_value
