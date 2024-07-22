@@ -167,35 +167,35 @@ check_required_variables() {
     "NODE_VERSION"
     "NODE_NAME"
     "NODE_NET_P2P_PORT"
-    "NH_CONF_NAME"
-    "NH_CONF_BASE_PATH"
-    "NH_CONF_CHAIN"
+    "ZKV_CONF_NAME"
+    "ZKV_CONF_BASE_PATH"
+    "ZKV_CONF_CHAIN"
   )
 
   if [ "${NODE_TYPE}" = "boot-node" ]; then
     TO_CHECK+=(
       "NODE_NET_P2P_PORT_WS"
-      "NH_NODE_KEY_FILE"
-      "NH_CONF_LISTEN_ADDR"
-      "NH_CONF_LISTEN_ADDR_2"
+      "ZKV_NODE_KEY_FILE"
+      "ZKV_CONF_LISTEN_ADDR"
+      "ZKV_CONF_LISTEN_ADDR_2"
     )
   fi
 
   if [ "${NODE_TYPE}" = "validator-node" ]; then
     TO_CHECK+=(
-      "NH_NODE_KEY_FILE"
-      "NH_CONF_VALIDATOR"
-      "NH_SECRET_PHRASE_PATH"
+      "ZKV_NODE_KEY_FILE"
+      "ZKV_CONF_VALIDATOR"
+      "ZKV_SECRET_PHRASE_PATH"
     )
   fi
 
   if [ "${NODE_TYPE}" = "rpc-node" ]; then
     TO_CHECK+=(
       "NODE_NET_RPC_PORT"
-      "NH_CONF_RPC_CORS"
-      "NH_CONF_RPC_EXTERNAL"
-      "NH_CONF_RPC_METHODS"
-      "NH_CONF_PRUNING"
+      "ZKV_CONF_RPC_CORS"
+      "ZKV_CONF_RPC_EXTERNAL"
+      "ZKV_CONF_RPC_METHODS"
+      "ZKV_CONF_PRUNING"
     )
   fi
 
@@ -240,7 +240,7 @@ create_node_key() {
       fn_die "Node key import aborted; please run again the init.sh script. Exiting ...\n"
     fi
   else
-    if ! node_key="$(docker run --rm --entrypoint nh-node horizenlabs/zkverify:"${NODE_VERSION}" key generate-node-key 2>/dev/null)"; then
+    if ! node_key="$(docker run --rm --entrypoint zkv-node horizenlabs/zkverify:"${NODE_VERSION}" key generate-node-key 2>/dev/null)"; then
       fn_die "\nError: could not generate node key. Fix it before proceeding any further. Exiting...\n"
     fi
   fi
@@ -262,7 +262,7 @@ create_secret_phrase() {
       fn_die "Secret phrase import aborted; please run again the init.sh script. Exiting ...\n"
     fi
   else
-    if ! secret_json="$(docker run --rm --entrypoint nh-node horizenlabs/zkverify:"${NODE_VERSION}" key generate --output-type json)"; then
+    if ! secret_json="$(docker run --rm --entrypoint zkv-node horizenlabs/zkverify:"${NODE_VERSION}" key generate --output-type json)"; then
       fn_die "\nError: could not generate secret phrase. Fix it before proceeding any further. Exiting...\n"
     fi
     if [ -z "${secret_json}" ]; then
@@ -296,7 +296,7 @@ set_up_node_name_env_var() {
       read -rp "#? " node_name
     done
   fi
-  sed -i "s/NH_CONF_NAME=.*/NH_CONF_NAME=${node_name}/g" "${ENV_FILE}" || fn_die "\nError: could not set name variable in ${ENV_FILE} file. Fix it before proceeding any further. Exiting...\n"
+  sed -i "s/ZKV_CONF_NAME=.*/ZKV_CONF_NAME=${node_name}/g" "${ENV_FILE}" || fn_die "\nError: could not set name variable in ${ENV_FILE} file. Fix it before proceeding any further. Exiting...\n"
 }
 
 set_up_rpc_methods_env_var() {
@@ -304,7 +304,7 @@ set_up_rpc_methods_env_var() {
   if [ "${rpc_methods_answer}" = "yes" ]; then
     log_warn "\nPlease select the rpc methods you want to use: "
     rpc_methods="$(selection "safe unsafe auto")"
-    sed -i "s/NH_CONF_RPC_METHODS=.*/NH_CONF_RPC_METHODS=${rpc_methods}/g" "${ENV_FILE}" || fn_die "\nError: could not set rpc methods variable in ${ENV_FILE} file. Fix it before proceeding any further. Exiting...\n"
+    sed -i "s/ZKV_CONF_RPC_METHODS=.*/ZKV_CONF_RPC_METHODS=${rpc_methods}/g" "${ENV_FILE}" || fn_die "\nError: could not set rpc methods variable in ${ENV_FILE} file. Fix it before proceeding any further. Exiting...\n"
   fi
 }
 
@@ -317,6 +317,6 @@ set_up_pruning_env_var() {
       log_warn "\nPruning value cannot be empty. Try again..."
       read -rp "#? " pruning_value
     done
-    sed -i "s/NH_CONF_PRUNING=.*/NH_CONF_PRUNING=${pruning_value}/g" "${ENV_FILE}" || fn_die "\nError: could not set pruning configuration variable in ${ENV_FILE} file. Fix it before proceeding any further. Exiting...\n"
+    sed -i "s/ZKV_CONF_PRUNING=.*/ZKV_CONF_PRUNING=${pruning_value}/g" "${ENV_FILE}" || fn_die "\nError: could not set pruning configuration variable in ${ENV_FILE} file. Fix it before proceeding any further. Exiting...\n"
   fi
 }
