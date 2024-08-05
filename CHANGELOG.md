@@ -2,7 +2,8 @@
 
 **0.5.0**
 
-* This release includes version **0.5.0** (exactly **0.5.0-0.5.0**) of the [zkVerify](https://github.com/HorizenLabs/zkVerify) project.
+* This release includes version **0.5.0** (exactly **0.5.0-0.5.0**, **node_version-runtime_version**) of the [zkVerify](https://github.com/HorizenLabs/zkVerify) project.
+  From hereon the tag on this repository will match the node part (first part) of the tag on the zkVerify repository.
 
 **0.4.0**
 
