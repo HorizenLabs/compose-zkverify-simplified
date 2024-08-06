@@ -1,5 +1,9 @@
 # Changelog
 
+**0.5.1**
+
+* This release includes version **0.5.1** of the [zkVerify](https://github.com/HorizenLabs/zkVerify) project.
+
 **0.5.0**
 
 * This release includes version **0.5.0** (exactly **0.5.0-0.5.0**, **node_version-runtime_version**) of the [zkVerify](https://github.com/HorizenLabs/zkVerify) project.
