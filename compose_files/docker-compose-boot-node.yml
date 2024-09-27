@@ -1,10 +1,72 @@
 volumes:
   node-data:
+  html:
+  certs:
+  acme:
 
 networks:
+  node-network:
+    internal: true
+    ipam:
+      config:
+        - subnet: ${INTERNAL_NETWORK_SUBNET?err_unset}
   inet:
 
 services:
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    hostname: nginx-proxy
+    pull_policy: always
+    restart: on-failure:5
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    environment:
+      - DEBUG=true
+      - "RESOLVERS=127.0.0.11 8.8.8.8 valid=300s timeout=5s"
+    networks:
+      node-network:
+        ipv4_address: ${NGINX_NET_IP_ADDRESS?err_unset}
+      inet:
+    tmpfs:
+      - /var/cache/nginx
+      - /run
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "512m"
+        max-file: "4"
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    hostname: nginx-proxy-acme
+    pull_policy: always
+    restart: on-failure:5
+    environment:
+      - "DEFAULT_EMAIL=${ACME_DEFAULT_EMAIL?err_unset}"
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - certs:/etc/nginx/certs:rw
+      - acme:/etc/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - inet
+    tmpfs:
+      - /var/cache
+      - /run
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "512m"
+        max-file: "4"
+
   node:
     image: horizenlabs/zkverify:${NODE_VERSION}
     env_file:
@@ -12,7 +74,13 @@ services:
     container_name: ${NODE_NAME}
     hostname: ${NODE_NAME}
     restart: on-failure:5
+    environment:
+      - "VIRTUAL_HOST=${ACME_VHOST?err_unset}"
+      - "VIRTUAL_PORT=${NODE_NET_P2P_PORT_WS?err_unset}"
+      - "LETSENCRYPT_HOST=${ACME_VHOST?err_unset}"
     networks:
+      node-network:
+        ipv4_address: ${NODE_NET_IP_ADDRESS}
       inet:
     ports:
       - "${NODE_NET_P2P_PORT}:${NODE_NET_P2P_PORT}"
