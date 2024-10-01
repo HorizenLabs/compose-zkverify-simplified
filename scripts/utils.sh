@@ -326,18 +326,6 @@ set_up_pruning_env_var() {
   fi
 }
 
-# Function to check if the FQDN is valid
-is_valid_fqdn() {
-  local fqdn="${1}"
-
-  # Check if the FQDN matches the regex pattern
-  if [[ "${fqdn}" =~ ^([a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$ ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 # Function to set and check if the FQDN is valid
 set_acme_vhost() {
   while true; do
