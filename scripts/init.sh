@@ -43,7 +43,13 @@ if ! [ -d "${DEPLOYMENT_DIR}" ]; then
       set_up_rpc_methods_env_var
       set_up_pruning_env_var
     fi
+
+    if [ "${NODE_TYPE}" = "boot-node" ]; then
+      set_acme_vhost
+      set_acme_email_address
+    fi
   fi
+
   # shellcheck source=.env
   source "${ENV_FILE}" || fn_die "\nError: could not source ${ENV_FILE} file. Fix it before proceeding any further. Exiting...\n"
   check_required_variables

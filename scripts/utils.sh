@@ -174,6 +174,11 @@ check_required_variables() {
 
   if [ "${NODE_TYPE}" = "boot-node" ]; then
     TO_CHECK+=(
+      "INTERNAL_NETWORK_SUBNET"
+      "ACME_VHOST"
+      "ACME_DEFAULT_EMAIL"
+      "NGINX_NET_IP_ADDRESS"
+      "NODE_NET_IP_ADDRESS"
       "NODE_NET_P2P_PORT_WS"
       "ZKV_NODE_KEY_FILE"
       "ZKV_CONF_LISTEN_ADDR"
@@ -240,14 +245,14 @@ create_node_key() {
       fn_die "Node key import aborted; please run again the init.sh script. Exiting ...\n"
     fi
   else
-    if ! node_key="$(docker run --rm --entrypoint zkv-node horizenlabs/zkverify:"${NODE_VERSION}" key generate-node-key 2>/dev/null)"; then
+    if ! node_key="$(docker run --rm --entrypoint zkv-node horizenlabs/zkverify:"${NODE_VERSION}" key generate-node-key)"; then
       fn_die "\nError: could not generate node key. Fix it before proceeding any further. Exiting...\n"
     fi
   fi
   if [ -z "${node_key}" ]; then
     fn_die "\nError: node key is empty. Fix it before proceeding any further. Exiting...\n"
   fi
-  echo -n "${node_key}" >"${DEPLOYMENT_DIR}/configs/node/secrets/node_key.dat"
+  printf "%s" "${node_key}" > "${DEPLOYMENT_DIR}/configs/node/secrets/node_key.dat"
   log_info "\nFile ${DEPLOYMENT_DIR}/configs/node/secrets/node_key.dat was created."
   log_red "\n***STORE A COPY OF THE FILE IN A SAFE PLACE. KEEP THE FILE UNDER ITS ORIGINAL LOCATION AS WELL SINCE IT IS REQUIRED TO RUN AND RECOVER (IF NEEDED) THE NODE***"
 }
@@ -320,3 +325,68 @@ set_up_pruning_env_var() {
     sed -i "s/ZKV_CONF_PRUNING=.*/ZKV_CONF_PRUNING=${pruning_value}/g" "${ENV_FILE}" || fn_die "\nError: could not set pruning configuration variable in ${ENV_FILE} file. Fix it before proceeding any further. Exiting...\n"
   fi
 }
+
+# Function to set and check if the FQDN is valid
+set_acme_vhost() {
+  while true; do
+    log_warn "\nPlease type or paste a valid FQDN value for Let's Encrypt to use for 'p2p/wss' support setup.\nIt has to satisfy the following requirements: https://github.com/nginx-proxy/acme-companion/blob/904b5e38b17183c7c40e194869faad08b09fa9dc/README.md#http-01-challenge-requirements"
+    read -rp "#? " fqdn
+
+    # Check if the input is empty
+    if [ -z "${fqdn}" ]; then
+      log_warn "\nFQDN value cannot be empty. Try again..."
+      continue
+    fi
+
+    # Check if the FQDN matches the regex pattern
+    if [[ "${fqdn}" =~ ^([a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$ ]]; then
+      # Ask for confirmation
+      nginx_value_confirm="$(selection_yn "\nDo you confirm this is the FQDN value you want to use: ${fqdn}?")"
+      if [ "${nginx_value_confirm}" = "yes" ]; then
+        # If the user confirms, break the loop and return success
+        sed -i "s/ACME_VHOST=.*/ACME_VHOST=${fqdn}/g" "${ENV_FILE}" || fn_die "\nError: could not set 'ACME_VHOST' variable value in ${ENV_FILE} file. Fix it before proceeding any further. Exiting...\n"
+        return 0
+      else
+        # If the user says no, ask for input again
+        log_warn "\nYou chose not to use this FQDN. Please enter a new one..."
+        continue
+      fi
+    else
+      # Invalid FQDN
+      log_red "\nInvalid FQDN: ${fqdn}. Please try again..."
+    fi
+  done
+}
+
+# Function to set and check if the email address is valid
+set_acme_email_address() {
+  while true; do
+    log_warn "\nPlease type or paste a valid email address that will be used by Let's Encrypt to warn you of impending certificate expiration (should the automated renewal fail) and to recover your account:"
+    read -rp "#? " email
+
+    # Check if the input is empty
+    if [ -z "${email}" ]; then
+      log_warn "\nEmail address cannot be empty. Try again..."
+      continue
+    fi
+
+    # Check if the email matches a simple regex pattern
+    if [[ "${email}" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
+      # Ask for confirmation
+      email_confirm="$(selection_yn "\nDo you confirm this is the email address you want to use: ${email}?")"
+      if [ "${email_confirm}" = "yes" ]; then
+        # If the user confirms, save the email and break the loop
+        sed -i "s/ACME_DEFAULT_EMAIL=.*/ACME_DEFAULT_EMAIL=${email}/g" "${ENV_FILE}" || fn_die "\nError: could not set 'ACME_DEFAULT_EMAIL' variable value in ${ENV_FILE} file. Fix it before proceeding any further. Exiting...\n"
+        return 0
+      else
+        # If the user says no, ask for input again
+        log_warn "\nYou chose not to use this email address. Please enter a new one..."
+        continue
+      fi
+    else
+      # Invalid email format
+      log_red "\nInvalid email address: ${email}. Please try again..."
+    fi
+  done
+}
+

@@ -34,11 +34,6 @@ Run the init.sh script and follow the instructions in order to prepare the deplo
 
 The script will generate the required deployment files under the [deployments](deployments) directory.
 
-### Boot node
-
-This repository provides the boot node's P2P configuration for WebSocket (WS) and TCP protocols. 
-For implementing secure WebSocket protocol (WSS) support for P2P communication, please refer to the official documentation [here](https://wiki.polkadot.network/docs/maintain-bootnode).
-
 ### Update
 
 When a new version of the node is released this project will be updated with the new version modified in the `.env.*.template` files.
